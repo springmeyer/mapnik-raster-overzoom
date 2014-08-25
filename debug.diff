@@ -1,0 +1,62 @@
+diff --git a/include/mapnik/renderer_common/process_raster_symbolizer.hpp b/include/mapnik/renderer_common/process_raster_symbolizer.hpp
+index 08d9000..e70e0a0 100644
+--- a/include/mapnik/renderer_common/process_raster_symbolizer.hpp
++++ b/include/mapnik/renderer_common/process_raster_symbolizer.hpp
+@@ -24,6 +24,7 @@
+ #define MAPNIK_RENDERER_COMMON_PROCESS_RASTER_SYMBOLIZER_HPP
+ 
+ // mapnik
++#include <mapnik/debug.hpp>
+ #include <mapnik/warp.hpp>
+ #include <mapnik/raster.hpp>
+ #include <mapnik/raster_colorizer.hpp>
+@@ -94,18 +95,49 @@ void render_raster_symbolizer(raster_symbolizer const &sym,
+                                            offset_y,
+                                            mesh_size,
+                                            scaling_method);
++                MAPNIK_LOG_ERROR(raster) << "•••••••••••• REPROJECT ••••••••••••\n";
+                 composite(target.data_, comp_op, opacity, start_x, start_y);
+             }
+             else
+             {
+                 double image_ratio_x = ext.width() / source->data_.width();
+                 double image_ratio_y = ext.height() / source->data_.height();
++                MAPNIK_LOG_ERROR(raster) << "ctrans w/h " << common.t_.width() << "/" << common.t_.height();
++                MAPNIK_LOG_ERROR(raster) << "ctrans scale x/y " << common.t_.scale_x() << "/" << common.t_.scale_y();
++                MAPNIK_LOG_ERROR(raster) << "ctrans extent " << common.t_.extent();
++                MAPNIK_LOG_ERROR(raster) << "source w/h " << source->data_.width() << "/" << source->data_.height();
++                MAPNIK_LOG_ERROR(raster) << "source->ext_ " << source->ext_;
++                MAPNIK_LOG_ERROR(raster) << "ext " << ext;
++                MAPNIK_LOG_ERROR(raster) << "raster width/height " << raster_width << "/" << raster_height;
++                MAPNIK_LOG_ERROR(raster) << "start x/y " << start_x << "/" << start_y;
++                MAPNIK_LOG_ERROR(raster) << "end x/y " << end_x << "/" << end_y;
++                MAPNIK_LOG_ERROR(raster) << "image_ratio x/y " << image_ratio_x << "/" << image_ratio_y;
++
++                if (raster_width == common.t_.width() &&
++                    raster_height == common.t_.height() )
++                {
++                    MAPNIK_LOG_ERROR(raster) << "•••••••••••• SCALE 1:1 ••••••••••••";
++                }
++                else
++                {
++                    if (raster_width > common.t_.width() ||
++                        raster_height > common.t_.height() )
++                    {
++                        MAPNIK_LOG_ERROR(raster) << "•••••••••••• TARGET TOO BIG ••••••••••••\n";
++                    }
++                    else
++                    {
++                        MAPNIK_LOG_ERROR(raster) << "•••••••••••• TARGET SUBSETTING ••••••••••••\n";
++                    }
++                }
++
+                 double eps = 1e-5;
+                 if ( (std::fabs(image_ratio_x - 1.0) <= eps) &&
+                      (std::fabs(image_ratio_y - 1.0) <= eps) &&
+                      (std::abs(start_x) <= eps) &&
+                      (std::abs(start_y) <= eps) )
+                 {
++                    MAPNIK_LOG_ERROR(raster) << "•••••••••••• DIRECT COMPOSITE ••••••••••••\n";
+                     composite(source->data_, comp_op, opacity, start_x, start_y);
+                 }
+                 else
